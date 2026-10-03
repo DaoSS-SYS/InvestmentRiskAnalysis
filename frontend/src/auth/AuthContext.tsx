@@ -18,7 +18,7 @@ interface AuthState {
   token: string | null
   isAuthenticated: boolean
   isRestoring: boolean
-  login: (userName: string, password: string) => Promise<void>
+  login: (userName: string, password: string, remember?: boolean) => Promise<void>
   logout: () => void
   isInRole: (...roles: string[]) => boolean
   canManagePortfolios: boolean
@@ -36,6 +36,17 @@ interface StoredSession {
   user: UserView
 }
 
+/** Удаляет сеанс из обоих хранилищ. */
+function clearStoredSession(): void {
+  try {
+    localStorage.removeItem(StorageKey)
+    sessionStorage.removeItem(StorageKey)
+  } catch {
+    // Недоступность хранилища не препятствует выходу: состояние
+    // приложения очищается в любом случае.
+  }
+}
+
 /**
  * Читает сохранённый сеанс. Сеанс с истёкшим сроком действия маркера
  * не восстанавливается: обращение с таким маркером было бы отклонено
@@ -43,7 +54,11 @@ interface StoredSession {
  */
 function readStoredSession(): StoredSession | null {
   try {
-    const raw = localStorage.getItem(StorageKey)
+    // Сеанс ищется в обоих хранилищах: постоянное применяется, когда
+    // пользователь выбрал «не выходить на этом компьютере», хранилище
+    // вкладки — когда не выбрал. Вкладочное проверяется первым: если
+    // пользователь вошёл заново, не сохраняя сеанс, действует именно он.
+    const raw = sessionStorage.getItem(StorageKey) ?? localStorage.getItem(StorageKey)
 
     if (!raw) {
       return null
@@ -52,7 +67,7 @@ function readStoredSession(): StoredSession | null {
     const session = JSON.parse(raw) as StoredSession
 
     if (new Date(session.expiresAt).getTime() <= Date.now()) {
-      localStorage.removeItem(StorageKey)
+      clearStoredSession()
       return null
     }
 
@@ -81,7 +96,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [])
 
   const logout = useCallback(() => {
-    localStorage.removeItem(StorageKey)
+    clearStoredSession()
     setSession(null)
   }, [])
 
@@ -93,24 +108,34 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setUnauthorizedHandler(logout)
   }, [session, logout])
 
-  const login = useCallback(async (userName: string, password: string) => {
-    const result: LoginResult = await api.auth.login(userName, password)
+  const login = useCallback(
+    async (userName: string, password: string, remember = true) => {
+      const result: LoginResult = await api.auth.login(userName, password)
 
-    const stored: StoredSession = {
-      token: result.token,
-      expiresAt: result.expiresAt,
-      user: result.user,
-    }
+      const stored: StoredSession = {
+        token: result.token,
+        expiresAt: result.expiresAt,
+        user: result.user,
+      }
 
-    try {
-      localStorage.setItem(StorageKey, JSON.stringify(stored))
-    } catch {
-      // Невозможность сохранить сеанс не препятствует работе:
-      // он будет утрачен при обновлении страницы.
-    }
+      try {
+        // Выбор хранилища и есть содержание признака «не выходить
+        // на этом компьютере»: постоянное хранилище переживает закрытие
+        // браузера, хранилище вкладки — нет. Срок действия самого
+        // маркера задан сервером и признаком не изменяется.
+        clearStoredSession()
 
-    setSession(stored)
-  }, [])
+        const storage = remember ? localStorage : sessionStorage
+        storage.setItem(StorageKey, JSON.stringify(stored))
+      } catch {
+        // Невозможность сохранить сеанс не препятствует работе:
+        // он будет утрачен при обновлении страницы.
+      }
+
+      setSession(stored)
+    },
+    [],
+  )
 
   const value = useMemo<AuthState>(() => {
     const roles = session?.user.roles ?? []

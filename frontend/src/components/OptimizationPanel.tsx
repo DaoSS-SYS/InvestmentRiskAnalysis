@@ -161,7 +161,7 @@ export default function OptimizationPanel({ portfolioId, disabled }: Props) {
 
   const summary = (portfolio: NamedPortfolio, color: string) => (
     <Card size="small" styles={{ body: { paddingBottom: 8 } }}>
-      <Space direction="vertical" size={4} style={{ width: '100%' }}>
+      <Space orientation="vertical" size={4} style={{ width: '100%' }}>
         <Typography.Text strong style={{ color }}>
           {portfolio.name}
         </Typography.Text>
@@ -239,13 +239,13 @@ export default function OptimizationPanel({ portfolioId, disabled }: Props) {
       {optimization.isError && <Alert type="error" message={describeError(optimization.error)} />}
 
       {optimization.isFetching && (
-        <Space direction="vertical" align="center" style={{ width: '100%', padding: 24 }}>
+        <Space orientation="vertical" align="center" style={{ width: '100%', padding: 24 }}>
           <Spin />
         </Space>
       )}
 
       {data && !optimization.isFetching && (
-        <Space direction="vertical" size={16} style={{ width: '100%' }}>
+        <Space orientation="vertical" size={16} style={{ width: '100%' }}>
           <Row gutter={[12, 12]}>
             {data.current && <Col xs={24} md={8}>{summary(data.current, '#dc2626')}</Col>}
             <Col xs={24} md={8}>{summary(data.minimumVariance, '#15803d')}</Col>

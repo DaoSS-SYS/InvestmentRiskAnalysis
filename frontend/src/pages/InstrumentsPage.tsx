@@ -2,7 +2,6 @@ import { useState } from 'react'
 import {
   App,
   Button,
-  Card,
   Input,
   Modal,
   Popconfirm,
@@ -25,6 +24,7 @@ import type { ColumnsType } from 'antd/es/table'
 
 import { api, describeError } from '../api/client'
 import { useAuth } from '../auth/AuthContext'
+import { Card, SectionHead } from '../components/ui/primitives'
 import type { Instrument, SecuritySearchResult } from '../api/types'
 import { describeSecurityType, formatCount, formatDate, formatDuration } from '../lib/format'
 
@@ -104,11 +104,12 @@ export default function InstrumentsPage() {
         </Link>
       ),
     },
-    { title: 'Наименование', dataIndex: 'shortName', ellipsis: true },
+    { title: 'Наименование', dataIndex: 'shortName', ellipsis: true, responsive: ['md'] },
     {
       title: 'Тип',
       dataIndex: 'securityType',
       width: 130,
+      responsive: ['sm'],
       filters: [
         { text: 'Акция', value: 'Share' },
         { text: 'Индекс', value: 'Index' },
@@ -117,7 +118,7 @@ export default function InstrumentsPage() {
       onFilter: (value, record) => record.securityType === value,
       render: (type: string) => <Tag>{describeSecurityType(type)}</Tag>,
     },
-    { title: 'Режим торгов', dataIndex: 'board', width: 120 },
+    { title: 'Режим торгов', dataIndex: 'board', width: 120, responsive: ['xl'] },
     {
       title: 'Котировок',
       dataIndex: 'quoteCount',
@@ -125,11 +126,16 @@ export default function InstrumentsPage() {
       align: 'right',
       sorter: (a, b) => a.quoteCount - b.quoteCount,
       render: (value: number) =>
-        value > 0 ? formatCount(value) : <Typography.Text type="warning">нет данных</Typography.Text>,
+        value > 0 ? (
+          <span className="rl-num">{formatCount(value)}</span>
+        ) : (
+          <Typography.Text type="warning">нет данных</Typography.Text>
+        ),
     },
     {
       title: 'История',
       width: 210,
+      responsive: ['lg'],
       render: (_, record) =>
         record.historyFrom ? (
           <Typography.Text type="secondary" style={{ fontSize: 12 }}>
@@ -208,21 +214,44 @@ export default function InstrumentsPage() {
   ]
 
   return (
-    <Space direction="vertical" size={16} style={{ width: '100%' }}>
-      <Space style={{ width: '100%', justifyContent: 'space-between' }}>
-        <Typography.Title level={4} style={{ margin: 0 }}>
-          Справочник инструментов
-        </Typography.Title>
+    <Space orientation="vertical" size={16} style={{ width: '100%' }}>
+      <div
+        style={{
+          display: 'flex',
+          flexWrap: 'wrap',
+          alignItems: 'flex-end',
+          justifyContent: 'space-between',
+          gap: 16,
+        }}
+      >
+        <div>
+          <Typography.Title level={2} style={{ margin: 0, fontSize: 27, letterSpacing: -0.5 }}>
+            Справочник инструментов
+          </Typography.Title>
+          <Typography.Text type="secondary">
+            Финансовые инструменты и история их котировок
+          </Typography.Text>
+        </div>
 
         {canManageReferenceData && (
           <Button type="primary" icon={<SearchOutlined />} onClick={() => setSearchOpen(true)}>
             Найти на Московской Бирже
           </Button>
         )}
-      </Space>
+      </div>
 
-      <Card size="small">
+      <Card>
+        <SectionHead
+          title="Инструменты в справочнике"
+          subtitle={
+            instruments.data
+              ? `${instruments.data.length} инструментов`
+              : 'загрузка перечня'
+          }
+        />
+
         <Table
+          className="rl-table"
           rowKey="id"
           size="small"
           columns={columns}
@@ -243,7 +272,7 @@ export default function InstrumentsPage() {
         footer={null}
         width={860}
       >
-        <Space direction="vertical" size={12} style={{ width: '100%' }}>
+        <Space orientation="vertical" size={12} style={{ width: '100%' }}>
           <Input.Search
             placeholder="Биржевой код или часть наименования, например SBER или Сбербанк"
             enterButton="Искать"
@@ -259,6 +288,7 @@ export default function InstrumentsPage() {
           )}
 
           <Table
+            className="rl-table"
             rowKey={(record) => `${record.ticker}|${record.board}`}
             size="small"
             columns={searchColumns}

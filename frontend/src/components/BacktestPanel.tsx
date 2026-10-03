@@ -263,7 +263,7 @@ export default function BacktestPanel({ instrumentId }: Props) {
       {backtest.isError && <Alert type="error" message={describeError(backtest.error)} />}
 
       {backtest.isFetching && (
-        <Space direction="vertical" align="center" style={{ width: '100%', padding: 24 }}>
+        <Space orientation="vertical" align="center" style={{ width: '100%', padding: 24 }}>
           <Spin />
           <Typography.Text type="secondary">
             Выполняется проверка моделей на всей истории котировок
@@ -272,7 +272,7 @@ export default function BacktestPanel({ instrumentId }: Props) {
       )}
 
       {backtest.data && !backtest.isFetching && (
-        <Space direction="vertical" size={16} style={{ width: '100%' }}>
+        <Space orientation="vertical" size={16} style={{ width: '100%' }}>
           <Descriptions size="small" column={{ xs: 1, sm: 2, md: 2, lg: 4 }} bordered>
             <Descriptions.Item label="Период">
               {formatDate(backtest.data.from)} — {formatDate(backtest.data.to)}

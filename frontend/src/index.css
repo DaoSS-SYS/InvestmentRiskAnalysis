@@ -1,6 +1,58 @@
+/*
+ * Оформление RiskLab: переменные и общие классы.
+ *
+ * Здесь собраны значения, повторяющиеся более чем в одном месте.
+ * Правило простое: если величина встречается дважды, ей место здесь,
+ * а не в стиле компонента.
+ */
+
 :root {
+  /* Тёмный каркас */
+  --sidebar: #081f1a;
+  --sidebar-secondary: #0b2b24;
+
+  /* Действия и акценты */
+  --primary: #16856b;
+  --primary-bright: #23bd96;
+  --cyan: #1699a5;
+
+  /* Поверхности */
+  --canvas: #f2f7f5;
+  --surface: #ffffff;
+
+  /* Текст и границы */
+  --text: #17231f;
+  --muted: #6f7e78;
+  --line: #dfe9e5;
+
+  /* Семантика состояний */
+  --danger: #d65d66;
+  --warning: #d6952d;
+
+  /* Геометрия */
+  --radius-card: 16px;
+  --radius-panel: 18px;
+  --radius-control: 10px;
+
+  /* Тень карточек: мягкая, без выраженного направления */
+  --shadow-card: 0 1px 2px rgb(8 31 26 / 4%), 0 8px 24px rgb(8 31 26 / 4%);
+  --shadow-panel: 0 18px 48px rgb(8 31 26 / 18%);
+
+  /* Сворачивание боковой панели: длительность и закон движения
+     заданы единожды, чтобы ширина панели, отступ рабочей области
+     и исчезновение подписей шли согласованно. Рассогласование даже
+     в пару десятых долей секунды читается как рывок. */
+  --collapse-duration: 240ms;
+  --collapse-ease: cubic-bezier(0.4, 0, 0.2, 1);
+
+  /* Размеры каркаса */
+  --sidebar-width: 250px;
+  --sidebar-width-collapsed: 76px;
+  --topbar-height: 72px;
+
   font-family: 'Segoe UI', system-ui, -apple-system, 'Helvetica Neue', Arial, sans-serif;
   line-height: 1.5;
+  color: var(--text);
 }
 
 * {
@@ -10,9 +62,749 @@
 body {
   margin: 0;
   min-height: 100vh;
-  background: #f5f7fa;
+  background: var(--canvas);
 }
 
 #root {
   min-height: 100vh;
+}
+
+/* ------------------------------------------------------------------ */
+/* Каркас приложения                                                   */
+/* ------------------------------------------------------------------ */
+
+.rl-shell {
+  display: flex;
+  min-height: 100vh;
+  background: var(--canvas);
+}
+
+.rl-sidebar {
+  position: fixed;
+  inset-block: 0;
+  inset-inline-start: 0;
+  z-index: 100;
+  display: flex;
+  flex-direction: column;
+  width: var(--sidebar-width);
+  padding: 20px 14px;
+  background: linear-gradient(170deg, var(--sidebar-secondary) 0%, var(--sidebar) 68%);
+  color: #e8f2ee;
+  transition: width var(--collapse-duration) var(--collapse-ease);
+}
+
+.rl-sidebar--collapsed {
+  width: var(--sidebar-width-collapsed);
+  padding-inline: 12px;
+}
+
+.rl-sidebar__brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 4px 8px 22px;
+  min-height: 62px;
+}
+
+.rl-sidebar__brand-text {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  max-width: 190px;
+  overflow: hidden;
+  white-space: nowrap;
+  opacity: 1;
+  transition:
+    max-width var(--collapse-duration) var(--collapse-ease),
+    opacity 160ms ease 80ms;
+}
+
+.rl-sidebar--collapsed .rl-sidebar__brand-text {
+  max-width: 0;
+  opacity: 0;
+  transition:
+    max-width var(--collapse-duration) var(--collapse-ease),
+    opacity 110ms ease;
+}
+
+.rl-sidebar__brand-name {
+  font-size: 19px;
+  font-weight: 700;
+  letter-spacing: -0.2px;
+  color: #ffffff;
+  line-height: 1.15;
+}
+
+.rl-sidebar__brand-sub {
+  font-size: 9.5px;
+  font-weight: 600;
+  letter-spacing: 1.1px;
+  text-transform: uppercase;
+  color: rgb(232 242 238 / 52%);
+}
+
+.rl-sidebar__group {
+  display: flex;
+  align-items: center;
+  min-height: 34px;
+  padding: 16px 12px 8px;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 1.1px;
+  text-transform: uppercase;
+  color: rgb(232 242 238 / 42%);
+  white-space: nowrap;
+  overflow: hidden;
+}
+
+.rl-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.rl-nav__link {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 11px 14px;
+  border-radius: 12px;
+  color: rgb(232 242 238 / 76%);
+  font-size: 14px;
+  text-decoration: none;
+  white-space: nowrap;
+  overflow: hidden;
+  transition: background 0.16s ease, color 0.16s ease;
+}
+
+.rl-nav__link:hover {
+  background: rgb(255 255 255 / 6%);
+  color: #ffffff;
+}
+
+.rl-nav__link--active {
+  background: rgb(35 189 150 / 14%);
+  color: #ffffff;
+  font-weight: 600;
+}
+
+/* Яркий вертикальный индикатор активного пункта */
+.rl-nav__link--active::before {
+  content: '';
+  position: absolute;
+  inset-inline-start: 0;
+  inset-block: 9px;
+  width: 3px;
+  border-radius: 0 3px 3px 0;
+  background: var(--primary-bright);
+}
+
+.rl-nav__icon {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 20px;
+  font-size: 17px;
+}
+
+/*
+ * Подпись, скрываемая при сворачивании панели.
+ *
+ * Прежде подписи удалялись из разметки, и содержимое панели
+ * перестраивалось мгновенно, пока её ширина ещё двигалась — это
+ * и читалось как рывок. Теперь они остаются на месте, а скрываются
+ * плавным сжатием и растворением.
+ *
+ * Непрозрачность гаснет быстрее, чем сжимается ширина: текст успевает
+ * исчезнуть прежде, чем для него не останется места, и потому
+ * не обрезается на полуслове.
+ */
+.rl-collapsible {
+  display: block;
+  max-width: 190px;
+  overflow: hidden;
+  white-space: nowrap;
+  opacity: 1;
+  transition:
+    max-width var(--collapse-duration) var(--collapse-ease),
+    opacity 160ms ease 80ms;
+}
+
+.rl-sidebar--collapsed .rl-collapsible {
+  max-width: 0;
+  opacity: 0;
+  transition:
+    max-width var(--collapse-duration) var(--collapse-ease),
+    opacity 110ms ease;
+}
+
+.rl-sidebar__user {
+  margin-top: auto;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  border-radius: 14px;
+  background: rgb(255 255 255 / 6%);
+  overflow: hidden;
+}
+
+.rl-sidebar__user-name {
+  display: block;
+  font-size: 13px;
+  font-weight: 600;
+  color: #ffffff;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.rl-sidebar__user-role {
+  display: block;
+  font-size: 11.5px;
+  color: rgb(232 242 238 / 58%);
+}
+
+.rl-sidebar__toggle {
+  position: absolute;
+  inset-block-start: 84px;
+  inset-inline-end: -11px;
+  z-index: 2;
+  display: grid;
+  place-items: center;
+  width: 22px;
+  height: 22px;
+  padding: 0;
+  border: 1px solid var(--line);
+  border-radius: 50%;
+  background: var(--surface);
+  color: var(--muted);
+  font-size: 10px;
+  cursor: pointer;
+  box-shadow: var(--shadow-card);
+}
+
+.rl-sidebar__toggle:hover {
+  color: var(--primary);
+}
+
+.rl-main {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  margin-inline-start: var(--sidebar-width);
+  transition: margin-inline-start var(--collapse-duration) var(--collapse-ease);
+}
+
+.rl-main--wide {
+  margin-inline-start: var(--sidebar-width-collapsed);
+}
+
+.rl-topbar {
+  position: sticky;
+  top: 0;
+  z-index: 60;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  min-height: var(--topbar-height);
+  padding: 12px 32px;
+  background: rgb(255 255 255 / 92%);
+  backdrop-filter: blur(8px);
+  border-bottom: 1px solid var(--line);
+}
+
+/* Кнопка выезжающей навигации: видна только на узком экране */
+.rl-burger {
+  display: none;
+  flex: none;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: var(--surface);
+  color: var(--text);
+  cursor: pointer;
+}
+
+.rl-topbar__crumbs {
+  font-size: 12.5px;
+  color: var(--muted);
+}
+
+.rl-topbar__title {
+  font-size: 17px;
+  font-weight: 650;
+  color: var(--text);
+  line-height: 1.25;
+}
+
+.rl-content {
+  flex: 1;
+  padding: 28px 32px 40px;
+}
+
+.rl-footer {
+  padding: 0 32px 28px;
+  font-size: 11.5px;
+  color: var(--muted);
+}
+
+/* ------------------------------------------------------------------ */
+/* Карточки и панели                                                   */
+/* ------------------------------------------------------------------ */
+
+.rl-card {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-card);
+  box-shadow: var(--shadow-card);
+}
+
+/* Крупная тёмная панель: применяется один раз на странице, для главного
+   вывода. Повторение обесценивает приём. */
+.rl-hero {
+  position: relative;
+  overflow: hidden;
+  padding: 28px 32px;
+  border-radius: var(--radius-panel);
+  background:
+    radial-gradient(120% 140% at 88% 8%, rgb(35 189 150 / 22%) 0%, transparent 52%),
+    linear-gradient(135deg, #0d3a2f 0%, var(--sidebar) 74%);
+  color: #ffffff;
+  box-shadow: var(--shadow-panel);
+}
+
+.rl-hero__eyebrow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 10.5px;
+  font-weight: 600;
+  letter-spacing: 1.2px;
+  text-transform: uppercase;
+  color: rgb(255 255 255 / 62%);
+}
+
+.rl-hero__title {
+  margin: 12px 0 0;
+  font-size: 25px;
+  font-weight: 700;
+  letter-spacing: -0.3px;
+}
+
+.rl-hero__text {
+  margin: 10px 0 0;
+  max-width: 620px;
+  font-size: 13.5px;
+  line-height: 1.55;
+  color: rgb(255 255 255 / 74%);
+}
+
+.rl-hero__metrics {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 36px;
+  margin-top: 22px;
+}
+
+.rl-hero__metric-label {
+  font-size: 10.5px;
+  font-weight: 600;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: rgb(255 255 255 / 58%);
+}
+
+.rl-hero__metric-value {
+  margin-top: 4px;
+  font-size: 23px;
+  font-weight: 700;
+  letter-spacing: -0.4px;
+}
+
+/* Показательная карточка */
+.rl-stat__head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.rl-stat__label {
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.rl-stat__icon {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  background: var(--canvas);
+  color: var(--primary);
+  font-size: 14px;
+}
+
+.rl-stat__value {
+  margin-top: 10px;
+  font-size: 26px;
+  font-weight: 700;
+  letter-spacing: -0.5px;
+  line-height: 1.15;
+}
+
+.rl-stat__hint {
+  margin-top: 6px;
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.rl-section__title {
+  font-size: 15px;
+  font-weight: 650;
+  color: var(--text);
+}
+
+.rl-section__subtitle {
+  margin-top: 2px;
+  font-size: 12.5px;
+  color: var(--muted);
+}
+
+/* Двухчастная сетка: главный блок и боковой. На узком экране
+   раскладывается в одну колонку. */
+.rl-grid-split {
+  display: grid;
+  gap: 16px;
+}
+
+/* Сетка показателей: четыре, два либо один столбец */
+.rl-grid-kpi {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 16px;
+}
+
+/* ------------------------------------------------------------------ */
+/* Перечень источников данных                                          */
+/* ------------------------------------------------------------------ */
+
+/*
+ * Сетка задаётся на перечне целиком, а не на отдельной строке.
+ * Благодаря этому столбцы общие для всех строк, и метки состояния
+ * выстраиваются по одной вертикали независимо от длины наименования
+ * источника. При раскладке построчно каждая строка делила бы ширину
+ * самостоятельно, и метки оказывались бы на разных уровнях.
+ */
+.rl-sources {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto auto;
+  align-items: center;
+  column-gap: 16px;
+}
+
+/* Ячейки размещены в сетке напрямую, без промежуточной строки:
+   так столбцы остаются общими без применения subgrid, поддержка
+   которого пока не повсеместна. Разделитель рисует каждая ячейка. */
+.rl-sources__cell {
+  display: flex;
+  align-items: center;
+  min-height: 46px;
+  border-bottom: 1px solid var(--line);
+}
+
+.rl-sources__name {
+  font-size: 13.5px;
+  font-weight: 500;
+}
+
+.rl-sources__detail {
+  justify-content: flex-end;
+  font-size: 12px;
+  color: var(--muted);
+  white-space: nowrap;
+}
+
+/* ------------------------------------------------------------------ */
+/* Вкладки, закрепляемые при прокрутке                                 */
+/* ------------------------------------------------------------------ */
+
+.rl-sticky-tabs {
+  position: sticky;
+  top: var(--topbar-height);
+  z-index: 50;
+  margin: 0 -32px;
+  padding: 0 32px;
+  background: var(--canvas);
+  box-shadow: 0 10px 16px -14px rgb(8 31 26 / 30%);
+}
+
+/* ------------------------------------------------------------------ */
+/* Авторизация                                                         */
+/* ------------------------------------------------------------------ */
+
+.rl-login {
+  display: grid;
+  grid-template-columns: 58fr 42fr;
+  min-height: 100vh;
+}
+
+.rl-login__art {
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 44px 56px;
+  color: #ffffff;
+  background:
+    radial-gradient(90% 70% at 76% 18%, rgb(22 153 165 / 30%) 0%, transparent 60%),
+    radial-gradient(80% 60% at 18% 88%, rgb(35 189 150 / 22%) 0%, transparent 58%),
+    linear-gradient(150deg, #0e4135 0%, var(--sidebar) 62%);
+}
+
+/* Едва заметная координатная сетка: признак измерения, а не украшение */
+.rl-login__grid {
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(rgb(255 255 255 / 4%) 1px, transparent 1px),
+    linear-gradient(90deg, rgb(255 255 255 / 4%) 1px, transparent 1px);
+  background-size: 56px 56px;
+  pointer-events: none;
+}
+
+.rl-login__content {
+  position: relative;
+  max-width: 560px;
+}
+
+.rl-login__title {
+  margin: 18px 0 0;
+  font-size: 42px;
+  font-weight: 700;
+  line-height: 1.12;
+  letter-spacing: -1px;
+}
+
+.rl-login__lead {
+  margin: 18px 0 0;
+  max-width: 480px;
+  font-size: 15px;
+  line-height: 1.6;
+  color: rgb(255 255 255 / 76%);
+}
+
+.rl-login__panel {
+  position: relative;
+  padding: 18px 20px 12px;
+  border: 1px solid rgb(255 255 255 / 10%);
+  border-radius: 16px;
+  background: rgb(255 255 255 / 6%);
+}
+
+.rl-login__form {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 48px;
+  background: var(--canvas);
+}
+
+.rl-login__card {
+  width: 100%;
+  max-width: 420px;
+  padding: 36px 38px;
+  border-radius: 26px;
+  background: var(--surface);
+  box-shadow: 0 24px 64px rgb(8 31 26 / 10%);
+}
+
+/* ------------------------------------------------------------------ */
+/* Таблицы и диаграммы                                                 */
+/* ------------------------------------------------------------------ */
+
+.rl-table .ant-table-thead > tr > th {
+  background: #f7faf9;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.6px;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.rl-table .ant-table-tbody > tr > td {
+  height: 46px;
+  padding-block: 10px;
+}
+
+.rl-num {
+  font-variant-numeric: tabular-nums;
+}
+
+/* ------------------------------------------------------------------ */
+/* Доступность                                                         */
+/* ------------------------------------------------------------------ */
+
+:focus-visible {
+  outline: 2px solid var(--primary-bright);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* ------------------------------------------------------------------ */
+/* Приспособление к ширине экрана                                      */
+/* ------------------------------------------------------------------ */
+
+@media (width <= 1279px) {
+  .rl-grid-kpi {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (width <= 1023px) {
+  .rl-grid-split {
+    grid-template-columns: minmax(0, 1fr) !important;
+  }
+
+  .rl-content,
+  .rl-topbar {
+    padding-inline: 20px;
+  }
+
+  .rl-footer {
+    padding-inline: 20px;
+  }
+
+  .rl-sticky-tabs {
+    margin-inline: -20px;
+    padding-inline: 20px;
+  }
+
+  .rl-login {
+    grid-template-columns: 1fr;
+  }
+
+  .rl-login__art {
+    display: none;
+  }
+}
+
+@media (width <= 767px) {
+  .rl-sidebar {
+    transform: translateX(-100%);
+    transition: transform var(--collapse-duration) var(--collapse-ease);
+  }
+
+  .rl-sidebar--open {
+    transform: translateX(0);
+    box-shadow: var(--shadow-panel);
+  }
+
+  .rl-sidebar__toggle {
+    display: none;
+  }
+
+  .rl-main,
+  .rl-main--wide {
+    margin-inline-start: 0;
+  }
+
+  .rl-content {
+    padding: 20px 16px 32px;
+  }
+
+  /* Отступы полосы вкладок обязаны совпадать с отступами рабочей
+     области: расхождение делает полосу шире страницы и вызывает
+     горизонтальную прокрутку. */
+  .rl-sticky-tabs {
+    margin-inline: -16px;
+    padding-inline: 16px;
+  }
+
+  .rl-topbar {
+    padding-inline: 16px;
+  }
+
+  .rl-burger {
+    display: grid;
+  }
+
+  .rl-grid-kpi {
+    grid-template-columns: 1fr;
+  }
+
+  /* На узком экране пояснение переносится под наименование:
+     три столбца в одну строку туда не помещаются. */
+  .rl-sources {
+    grid-template-columns: minmax(0, 1fr) auto;
+  }
+
+  .rl-sources__detail {
+    grid-column: 1 / -1;
+    justify-content: flex-start;
+    min-height: 0;
+    padding-bottom: 12px;
+    white-space: normal;
+  }
+
+  /* Разделитель остаётся только под последней ячейкой строки */
+  .rl-sources__name,
+  .rl-sources__state {
+    border-bottom: 0;
+    min-height: 34px;
+  }
+
+  .rl-hero {
+    padding: 22px 20px;
+  }
+
+  .rl-hero__title {
+    font-size: 21px;
+  }
+
+  .rl-hero__metrics {
+    gap: 22px;
+  }
+
+  .rl-login__form {
+    padding: 24px 16px;
+  }
+
+  .rl-login__card {
+    padding: 28px 22px;
+  }
+}
+
+/* Затемнение под выезжающей навигацией */
+.rl-scrim {
+  position: fixed;
+  inset: 0;
+  z-index: 99;
+  background: rgb(8 31 26 / 45%);
+  border: 0;
+  padding: 0;
+}
+
+/* ------------------------------------------------------------------ */
+/* Уважение к настройке уменьшения движения                            */
+/* ------------------------------------------------------------------ */
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
 }

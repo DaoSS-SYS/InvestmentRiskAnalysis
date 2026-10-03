@@ -48,7 +48,7 @@ export default function StressTestPanel({ portfolioId, disabled }: Props) {
       title: 'Сценарий',
       dataIndex: 'name',
       render: (name: string, record) => (
-        <Space direction="vertical" size={0}>
+        <Space orientation="vertical" size={0}>
           <Typography.Text strong>{name}</Typography.Text>
           <Tag color={record.kind === 'Historical' ? 'blue' : 'purple'}>
             {record.kind === 'Historical' ? 'исторический' : 'гипотетический'}
@@ -209,13 +209,13 @@ export default function StressTestPanel({ portfolioId, disabled }: Props) {
       {stress.isError && <Alert type="error" message={describeError(stress.error)} />}
 
       {stress.isFetching && (
-        <Space direction="vertical" align="center" style={{ width: '100%', padding: 24 }}>
+        <Space orientation="vertical" align="center" style={{ width: '100%', padding: 24 }}>
           <Spin />
         </Space>
       )}
 
       {stress.data && !stress.isFetching && (
-        <Space direction="vertical" size={16} style={{ width: '100%' }}>
+        <Space orientation="vertical" size={16} style={{ width: '100%' }}>
           <Row gutter={[16, 16]}>
             <Col xs={24} sm={8}>
               <Card size="small">
@@ -277,7 +277,7 @@ export default function StressTestPanel({ portfolioId, disabled }: Props) {
             dataSource={scenarios}
             expandable={{
               expandedRowRender: (record) => (
-                <Space direction="vertical" size={8} style={{ width: '100%' }}>
+                <Space orientation="vertical" size={8} style={{ width: '100%' }}>
                   <Typography.Text type="secondary" style={{ fontSize: 12 }}>
                     {record.description}
                   </Typography.Text>

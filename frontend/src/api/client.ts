@@ -300,10 +300,59 @@ export const api = {
       ).data,
 
     /**
-     * Возвращает адрес выгрузки отчёта. Загрузка выполняется переходом
-     * по адресу, а не запросом через клиент: сервер передаёт файл
-     * с заголовком Content-Disposition, и браузер сохраняет его
-     * с предложенным именем.
+     * Выгружает отчёт и сохраняет его файлом.
+     *
+     * Загрузка выполняется запросом через клиент, а не переходом
+     * по адресу. Причина существенна: переход по ссылке не передаёт
+     * заголовок Authorization, а маркер доступа хранится в браузере,
+     * а не в куки-файле. Обращение по ссылке отклонялось бы сервером
+     * с состоянием 401, и кнопка выгрузки не работала бы.
+     *
+     * Имя файла берётся из заголовка Content-Disposition: сервер
+     * передаёт его в кодировке UTF-8, что сохраняет наименования
+     * на русском языке.
+     */
+    downloadReport: async (
+      id: number,
+      format: 'pdf' | 'xlsx',
+      options: { confidence?: number; horizon?: number; includeStressTest?: boolean } = {},
+    ): Promise<void> => {
+      const response = await http.get(
+        `/api/portfolios/${id}/report/${format}`,
+        { params: options, responseType: 'blob' },
+      )
+
+      const disposition = String(response.headers['content-disposition'] ?? '')
+      const encoded = /filename\*=UTF-8''([^;]+)/i.exec(disposition)
+      const plain = /filename="([^"]+)"/i.exec(disposition)
+
+      const fileName = encoded
+        ? decodeURIComponent(encoded[1])
+        : (plain?.[1] ?? `Отчёт.${format}`)
+
+      const url = URL.createObjectURL(response.data as Blob)
+
+      try {
+        const link = document.createElement('a')
+        link.href = url
+        link.download = fileName
+        document.body.appendChild(link)
+        link.click()
+        link.remove()
+      } finally {
+        // Адрес объекта удерживает файл в памяти до явного
+        // освобождения. Отсрочка нужна, чтобы браузер успел начать
+        // загрузку до того, как адрес станет недействительным.
+        setTimeout(() => URL.revokeObjectURL(url), 10_000)
+      }
+    },
+
+    /**
+     * Возвращает адрес выгрузки отчёта.
+     *
+     * Применяется там, где требуется сам адрес, например для показа
+     * его пользователю. Для загрузки следует применять downloadReport:
+     * переход по этому адресу не передаёт маркера доступа.
      */
     reportUrl: (
       id: number,
